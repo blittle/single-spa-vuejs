@@ -52,9 +52,9 @@ function mount(opts, mountedInstances, props) {
 			...opts.appOptions,
 			store
 		}
-		opts.Vue.prototype.globalEventDistributor = globalEventDistributor;
-		mountedInstances.instance = new opts.Vue(vueOpt);
-		mountedInstances.instance.globalEventDistributor = globalEventDistributor;
+		const extendedVue = opts.Vue.extend();
+		extendedVue.prototype.globalEventDistributor = globalEventDistributor;
+		mountedInstances.instance = new extendedVue(vueOpt);
 		resolve();
 	});
 }
