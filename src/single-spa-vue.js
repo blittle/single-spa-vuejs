@@ -5,7 +5,7 @@ const defaultOpts = {
 	template: null,
 }
 
-export default function singleSpaReact(userOpts) {
+export default function singleSpaVue(userOpts) {
 	if (typeof userOpts !== 'object') {
 		throw new Error(`single-spa-vue requires a configuration object`);
 	}
@@ -23,6 +23,11 @@ export default function singleSpaReact(userOpts) {
 		throw new Error('single-spa-vuejs must be passed opts.appOptions');
 	}
 
+	// use Vuex
+	if (opts.Vuex) {
+		opts.Vue.use(opts.Vuex);
+	}
+
 	// Just a shared object to store the mounted object state
 	let mountedInstances = {};
 
@@ -37,9 +42,19 @@ function bootstrap(opts) {
 	return Promise.resolve();
 }
 
-function mount(opts, mountedInstances) {
+function mount(opts, mountedInstances, props) {
 	return new Promise((resolve, reject) => {
-		mountedInstances.instance = new opts.Vue(opts.appOptions);
+		const {
+			store,
+			globalEventDistributor
+		} = props;
+		const vueOpt = {
+			...opts.appOptions,
+			store
+		}
+		const extendedVue = opts.Vue.extend();
+		extendedVue.prototype.globalEventDistributor = globalEventDistributor;
+		mountedInstances.instance = new extendedVue(vueOpt);
 		resolve();
 	});
 }
